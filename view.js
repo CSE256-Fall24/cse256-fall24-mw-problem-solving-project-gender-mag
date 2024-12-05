@@ -1,8 +1,62 @@
 // ---- Define your dialogs  and panels here ----
+const id_prefix = "effectivepermissions";
+const addInfoCol = true; // Adjust as needed based on your requirements
+const whichPermissions = null; // Use all permissions
+const permissions_panal = define_new_effective_permissions(id_prefix, addInfoCol, whichPermissions);
+let permsTitle = $(`
+<div id="d"> 
+    <h1>Effective Permissions</h1>
+    <h3>   Click "select user" to see what permissions each user has.</h3>
+</div>
+`)
+$('#sidepanel').append(permsTitle);
+$('#sidepanel').append(permissions_panal)
+const select_button_text = "select user";
+
+const user_select_field = define_new_user_select_field(id_prefix, select_button_text, on_user_change = function(selected_user){$('#effectivepermissions').attr('username', selected_user)});
+$('#sidepanel').append(user_select_field)
 
 
+const title = 'more info';
+const info = define_new_dialog(id_prefix, title, options);
 
+$('.perm_info').click(function() {
+    console.log('clicked!')
+    info.dialog('open');
+    const filepath = $('#effectivepermissions').attr('filepath')
+    const username = $('#effectivepermissions').attr('username')
+    const permissionType = $(this).attr('permission_name')
+
+    console.log('Username:', username);
+    console.log('Filepath:', filepath);
+    console.log('Permission Type:', permissionType);
+    //const permissionToCheck = $( this );
+    const explain_why = true;
+    const file = path_to_file[filepath];
+    const user = all_users[username];
+    const explanation = allow_user_action(file, user, permissionType, true)
+    //const allow_user = allow_user_action(file, user, permissionToCheck, explain_why);
+    //console.log($('#effectivepermissions').append(allow_user))
+    const explanationText = get_explanation_text(explanation);
+    //console.log(explanationText);
+    // console.log($('#perm_info').text(explanationText));
+    info.html(explanationText);
+
+    // if (user && file) {
+    //     //  const allowed = allow_user_action(file, user, perms);
+    //     //  const explanation = get_explanation_text(allowed);
+    //     const explanation = allow_user_action(file, user, permissionType, true)
+    //     const explanationText = get_explanation_text(explanation);
+    //      info.html(explanationText);
+    //  //explanation.text(explanation);
+    //      //explanation_dialog.dialog('open');
+    //  } else {
+    //      console.log("Error :(")
+    //  }
+    //info.html(explanationText);
+})
 // ---- Display file structure ----
+$('#effectivepermissions').attr('filepath', '/C')
 
 // (recursively) makes and returns an html element (wrapped in a jquery object) for a given file object
 function make_file_element(file_obj) {
@@ -11,9 +65,9 @@ function make_file_element(file_obj) {
     if(file_obj.is_folder) {
         let folder_elem = $(`<div class='folder' id="${file_hash}_div">
             <h3 id="${file_hash}_header">
-                <span class="oi oi-folder" id="${file_hash}_icon"/> ${file_obj.filename} 
+                <span class="bi bi-folder2" id="${file_hash}_icon"/> ${file_obj.filename} 
                 <button class="ui-button ui-widget ui-corner-all permbutton" path="${file_hash}" id="${file_hash}_permbutton"> 
-                    <span class="oi oi-lock-unlocked" id="${file_hash}_permicon"/> 
+                    <span class="bi bi-unlock" id="${file_hash}_permicon"/> 
                 </button>
             </h3>
         </div>`)
@@ -31,9 +85,9 @@ function make_file_element(file_obj) {
     }
     else {
         return $(`<div class='file'  id="${file_hash}_div">
-            <span class="oi oi-file" id="${file_hash}_icon"/> ${file_obj.filename}
+            <span class="bi bi-file-earmark" id="${file_hash}_icon"/> ${file_obj.filename}
             <button class="ui-button ui-widget ui-corner-all permbutton" path="${file_hash}" id="${file_hash}_permbutton"> 
-                <span class="oi oi-lock-unlocked" id="${file_hash}_permicon"/> 
+                <span class="bi bi-unlock" id="${file_hash}_permicon"/> 
             </button>
         </div>`)
     }
@@ -41,7 +95,7 @@ function make_file_element(file_obj) {
 
 for(let root_file of root_files) {
     let file_elem = make_file_element(root_file)
-    $( "#filestructure" ).append( file_elem);    
+    $( "#filestructure" ).append( file_elem);
 }
 
 
@@ -69,6 +123,5 @@ $('.permbutton').click( function( e ) {
     emitter.dispatchEvent(new CustomEvent('userEvent', { detail: new ClickEntry(ActionEnum.CLICK, (e.clientX + window.pageXOffset), (e.clientY + window.pageYOffset), e.target.id,new Date().getTime()) }))
 });
 
-
 // ---- Assign unique ids to everything that doesn't have an ID ----
-$('#html-loc').find('*').uniqueId() 
+$('#html-loc').find('*').uniqueId()
